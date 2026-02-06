@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <meta name="theme-color" content="#152238" />
+    <title>Survivor Bullet Hell</title>
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="icon" href="./icons/icon-192.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="app-shell">
+      <header id="hud">
+        <div class="hud-block" id="hud-left">
+          <div id="player-name">Player</div>
+          <div id="health-bar"><span id="health-fill"></span></div>
+        </div>
+        <div class="hud-block" id="hud-right">
+          <div id="coins-display">Coins: 0</div>
+          <div id="score-display">Score: 0</div>
+          <div id="best-display">Best: 0</div>
+        </div>
+      </header>
+
+      <main id="game-frame">
+        <canvas id="game-canvas" width="360" height="640" aria-label="Survivor Bullet Hell"></canvas>
+
+        <section id="overlay-menu" class="overlay visible">
+          <h1>Survivor Bullet Hell</h1>
+          <div class="field-row">
+            <label for="character-select">Character</label>
+            <select id="character-select"></select>
+          </div>
+          <div class="field-row">
+            <label for="weapon-select">Weapon</label>
+            <select id="weapon-select"></select>
+          </div>
+          <div class="field-row">
+            <label for="level-select">Level</label>
+            <select id="level-select"></select>
+          </div>
+          <button id="start-button">Start Run</button>
+          <button id="shop-button">Shop</button>
+          <button id="sfx-toggle">Toggle SFX</button>
+        </section>
+
+        <section id="overlay-pause" class="overlay">
+          <h2>Paused</h2>
+          <button id="resume-button">Resume</button>
+          <button id="quit-button">Quit Run</button>
+        </section>
+
+        <section id="overlay-shop" class="overlay scrollable">
+          <h2>Shop</h2>
+          <div id="shop-coins">Bank: 0</div>
+          <h3>Characters</h3>
+          <div id="shop-characters" class="card-list"></div>
+          <h3>Weapons</h3>
+          <div id="shop-weapons" class="card-list"></div>
+          <h3>Upgrades</h3>
+          <div id="shop-items" class="card-list"></div>
+          <button id="shop-close">Back</button>
+        </section>
+
+        <section id="overlay-gameover" class="overlay">
+          <h2>Run Complete</h2>
+          <div id="gameover-summary"></div>
+          <button id="gameover-menu">Main Menu</button>
+        </section>
+
+        <div id="toast-area" aria-live="polite"></div>
+        <button id="pause-button" aria-label="Pause">II</button>
+
+        <div id="touch-controls">
+          <div id="joystick-zone">
+            <div id="joystick-knob"></div>
+          </div>
+          <div id="button-zone">
+            <button id="shoot-button">Shoot</button>
+            <button id="special-button">Special</button>
+          </div>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="./dist/bundle.js"></script>
+  </body>
+</html>

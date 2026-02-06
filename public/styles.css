@@ -1,0 +1,275 @@
+:root {
+  --bg: #081220;
+  --panel: rgba(9, 24, 42, 0.92);
+  --accent: #f8b400;
+  --accent-soft: #ffd46d;
+  --danger: #ff5b5b;
+  --text: #eff7ff;
+  --muted: #9cb6d3;
+  --control: rgba(20, 52, 86, 0.78);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background:
+    radial-gradient(circle at 20% 15%, #1b3654 0%, transparent 40%),
+    radial-gradient(circle at 85% 5%, #243d60 0%, transparent 35%),
+    linear-gradient(180deg, #050c16, var(--bg));
+  color: var(--text);
+  font-family: "Trebuchet MS", "Avenir Next", sans-serif;
+}
+
+#app-shell {
+  max-width: 860px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+}
+
+#hud {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.4rem 0.3rem;
+  font-size: 0.9rem;
+}
+
+.hud-block {
+  background: rgba(5, 14, 26, 0.62);
+  border: 1px solid rgba(144, 184, 221, 0.24);
+  border-radius: 12px;
+  padding: 0.35rem 0.55rem;
+  min-width: 42%;
+}
+
+#health-bar {
+  margin-top: 0.2rem;
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #1e2f46;
+}
+
+#health-fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #46d27d, #9cf0b7);
+  transition: width 140ms linear;
+}
+
+#game-frame {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  min-height: 70vh;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(169, 201, 235, 0.2);
+  background: #111e31;
+}
+
+#game-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--panel);
+  backdrop-filter: blur(2px);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 1rem;
+  text-align: center;
+  z-index: 12;
+}
+
+.overlay.visible {
+  display: flex;
+  animation: fade-in 180ms ease-out;
+}
+
+.overlay.scrollable {
+  overflow-y: auto;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.field-row {
+  display: flex;
+  width: min(360px, 100%);
+  flex-direction: column;
+  gap: 0.2rem;
+  text-align: left;
+}
+
+label {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+select,
+button {
+  font: inherit;
+  border: 1px solid rgba(154, 184, 219, 0.4);
+  border-radius: 10px;
+  padding: 0.48rem 0.7rem;
+  color: var(--text);
+  background: #163355;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.card-list {
+  width: min(520px, 100%);
+  display: grid;
+  gap: 0.5rem;
+}
+
+.shop-card {
+  border: 1px solid rgba(159, 191, 223, 0.3);
+  border-radius: 10px;
+  background: rgba(19, 47, 80, 0.85);
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.shop-card strong {
+  display: block;
+}
+
+.shop-card .shop-meta {
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin: 0.2rem 0;
+}
+
+.shop-card button {
+  background: #225386;
+}
+
+#pause-button {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: 9;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(15, 35, 60, 0.76);
+}
+
+#touch-controls {
+  position: absolute;
+  inset: auto 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  pointer-events: none;
+  z-index: 7;
+}
+
+#joystick-zone {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  margin: 0.6rem;
+  background: var(--control);
+  border: 1px solid rgba(151, 184, 216, 0.35);
+  position: relative;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+#joystick-knob {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(221, 236, 255, 0.68);
+  position: absolute;
+  left: 39px;
+  top: 39px;
+  transition: transform 50ms linear;
+}
+
+#button-zone {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0.6rem;
+  pointer-events: auto;
+}
+
+#button-zone button {
+  width: 94px;
+  height: 56px;
+  border-radius: 16px;
+  background: rgba(31, 78, 123, 0.9);
+  border: 1px solid rgba(175, 205, 235, 0.45);
+}
+
+#toast-area {
+  position: absolute;
+  top: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  z-index: 16;
+}
+
+.toast {
+  background: rgba(8, 20, 33, 0.9);
+  border: 1px solid rgba(182, 211, 241, 0.35);
+  padding: 0.4rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+}
+
+.toast.update {
+  border-color: var(--accent-soft);
+  cursor: pointer;
+}
+
+@media (min-width: 900px) {
+  #touch-controls {
+    max-width: 800px;
+    margin: 0 auto;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+  }
+}
