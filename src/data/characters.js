@@ -1,0 +1,12 @@
+export const CHARACTERS = [
+  { id:'rookie', name:'Rookie', description:'Balanced starter.', baseStats:{maxHealth:100,healthRegen:0.4,speed:180,baseDamage:10,cooldown:380,size:14,armor:0.05}, startingWeaponId:'pistol', unlockCondition:{type:'default'} },
+  { id:'runner', name:'Runner', description:'Fast and fragile.', baseStats:{maxHealth:75,healthRegen:0.2,speed:240,baseDamage:9,cooldown:200,size:12,armor:0.02}, startingWeaponId:'smg', unlockCondition:{type:'coins',value:250} },
+  { id:'tank', name:'Tank', description:'Bulky frontline.', baseStats:{maxHealth:170,healthRegen:0.3,speed:130,baseDamage:12,cooldown:540,size:18,armor:0.25}, startingWeaponId:'shotgun', unlockCondition:{type:'coins',value:350} },
+  { id:'sharpshooter', name:'Sharpshooter', description:'Heavy precision hits.', baseStats:{maxHealth:90,healthRegen:0.2,speed:165,baseDamage:22,cooldown:820,size:13,armor:0.04}, startingWeaponId:'sniper', unlockCondition:{type:'score',value:1200} },
+  { id:'engineer', name:'Engineer', description:'Turret deployment specialist.', baseStats:{maxHealth:105,healthRegen:0.25,speed:170,baseDamage:11,cooldown:450,size:14,armor:0.08}, startingWeaponId:'turretgun', unlockCondition:{type:'playCount',value:4} },
+  { id:'medic', name:'Medic', description:'Steady passive healing.', baseStats:{maxHealth:95,healthRegen:1.2,speed:160,baseDamage:9,cooldown:360,size:14,armor:0.1}, startingWeaponId:'healpistol', unlockCondition:{type:'coins',value:500} },
+  { id:'berserker', name:'Berserker', description:'Damage spikes when low.', baseStats:{maxHealth:110,healthRegen:0.15,speed:190,baseDamage:15,cooldown:320,size:15,armor:0.03}, startingWeaponId:'sawblade', unlockCondition:{type:'score',value:1800} },
+  { id:'scout', name:'Scout', description:'Tiny dodge expert.', baseStats:{maxHealth:80,healthRegen:0.2,speed:220,baseDamage:10,cooldown:300,size:10,armor:0.01}, startingWeaponId:'burst', unlockCondition:{type:'playCount',value:8} },
+  { id:'demolisher', name:'Demolisher', description:'Explosive shells.', baseStats:{maxHealth:120,healthRegen:0.25,speed:150,baseDamage:20,cooldown:900,size:16,armor:0.12}, startingWeaponId:'grenade', unlockCondition:{type:'coins',value:900} },
+  { id:'ghost', name:'Ghost', description:'Can briefly vanish.', baseStats:{maxHealth:70,healthRegen:0.25,speed:210,baseDamage:12,cooldown:360,size:11,armor:0.02}, startingWeaponId:'phase', unlockCondition:{type:'levelsCompleted',value:3} }
+];
