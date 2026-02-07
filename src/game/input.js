@@ -24,6 +24,20 @@ function computePadVector(touch, pad, maxRadiusPx) {
   };
 }
 
+function applyDeadzone(vector, deadzone) {
+  const magnitude = Math.hypot(vector.x, vector.y);
+  if (magnitude <= deadzone) {
+    return { x: 0, y: 0 };
+  }
+
+  const direction = normalize(vector);
+  const adjustedMagnitude = (magnitude - deadzone) / (1 - deadzone);
+  return {
+    x: direction.x * adjustedMagnitude,
+    y: direction.y * adjustedMagnitude
+  };
+}
+
 function setKnob(knob, vector, maxRadiusPx) {
   const px = vector.x * maxRadiusPx;
   const py = vector.y * maxRadiusPx;
@@ -52,6 +66,8 @@ export class InputController {
     this.aimTouchId = null;
     this.aimTapStart = null;
     this.shootRequested = false;
+    this.moveDeadzone = 0.14;
+    this.aimDeadzone = 0.08;
 
     this.playerScreenPos = { x: canvas.width / 2, y: canvas.height / 2 };
 
@@ -157,7 +173,7 @@ export class InputController {
     }
 
     const radius = this.movePad.clientWidth * 0.34;
-    this.touchMove = computePadVector(touch, this.movePad, radius);
+    this.touchMove = applyDeadzone(computePadVector(touch, this.movePad, radius), this.moveDeadzone);
     setKnob(this.moveKnob, this.touchMove, radius);
   }
 
@@ -194,7 +210,7 @@ export class InputController {
     }
 
     const radius = this.aimPad.clientWidth * 0.34;
-    this.touchAim = computePadVector(touch, this.aimPad, radius);
+    this.touchAim = applyDeadzone(computePadVector(touch, this.aimPad, radius), this.aimDeadzone);
     const normalAim = normalize(this.touchAim);
     if (normalAim.x || normalAim.y) {
       this.touchAim = normalAim;
