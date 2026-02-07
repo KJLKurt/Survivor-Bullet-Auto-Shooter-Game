@@ -1,4 +1,4 @@
-import { copyFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import esbuild from "esbuild";
 
 const port = Number(process.env.PORT ?? 4173);
@@ -7,7 +7,9 @@ const copyServiceWorkerPlugin = {
   name: "copy-service-worker",
   setup(build) {
     build.onEnd(async () => {
-      await copyFile("service-worker.js", "public/service-worker.js");
+      const swTemplate = await readFile("service-worker.js", "utf8");
+      const swOutput = swTemplate.replace("__BUILD_ID__", "dev");
+      await writeFile("public/service-worker.js", swOutput, "utf8");
       console.log("Copied service-worker.js");
     });
   }

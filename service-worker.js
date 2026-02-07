@@ -1,4 +1,4 @@
-const CACHE_NAME = "survivor-shell-v1";
+const CACHE_NAME = "survivor-shell-__BUILD_ID__";
 const APP_SHELL = [
   "./",
   "./index.html",
