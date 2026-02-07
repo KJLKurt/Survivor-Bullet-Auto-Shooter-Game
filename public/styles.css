@@ -1,0 +1,260 @@
+:root {
+  --bg-0: #05080f;
+  --bg-1: #122743;
+  --bg-2: #225b80;
+  --ui-panel: rgba(6, 16, 30, 0.9);
+  --ui-border: #4ec5ff;
+  --ui-text: #d7f3ff;
+  --accent: #ffb347;
+  --danger: #ff5d5d;
+  --success: #68f0a4;
+  --shadow: rgba(0, 0, 0, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: radial-gradient(circle at 18% 12%, var(--bg-2), var(--bg-1) 44%, var(--bg-0));
+  color: var(--ui-text);
+  font-family: "Avenir Next Condensed", "Trebuchet MS", sans-serif;
+}
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.hud-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0.8rem;
+  background: linear-gradient(90deg, rgba(5, 17, 30, 0.95), rgba(19, 46, 74, 0.9));
+  border-bottom: 1px solid rgba(78, 197, 255, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 5;
+}
+
+.hud-left,
+.hud-right {
+  display: flex;
+  gap: 0.7rem;
+  align-items: center;
+  font-size: 0.92rem;
+}
+
+button {
+  border: 1px solid var(--ui-border);
+  color: var(--ui-text);
+  background: rgba(13, 31, 56, 0.95);
+  border-radius: 10px;
+  padding: 0.35rem 0.7rem;
+  font: inherit;
+}
+
+button:disabled {
+  opacity: 0.45;
+}
+
+.game-shell {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+}
+
+#gameCanvas {
+  display: block;
+  width: 100%;
+  height: calc(100vh - 56px);
+  touch-action: none;
+  background: #101926;
+}
+
+.overlay {
+  position: absolute;
+  left: 50%;
+  top: 18%;
+  transform: translateX(-50%);
+  background: var(--ui-panel);
+  border: 1px solid var(--ui-border);
+  box-shadow: 0 10px 26px var(--shadow);
+  border-radius: 12px;
+  width: min(90vw, 420px);
+  padding: 0.85rem;
+  z-index: 8;
+}
+
+.overlay p {
+  margin: 0 0 0.7rem;
+  text-align: center;
+}
+
+.update-banner {
+  position: absolute;
+  top: 0.8rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9;
+}
+
+.update-banner button {
+  border-color: var(--accent);
+  color: #fff2d1;
+  background: rgba(72, 42, 8, 0.95);
+}
+
+.toast-area {
+  position: absolute;
+  top: 4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(92vw, 420px);
+  display: grid;
+  gap: 0.4rem;
+  z-index: 7;
+}
+
+.toast {
+  border-radius: 8px;
+  padding: 0.45rem 0.7rem;
+  background: rgba(8, 22, 37, 0.93);
+  border: 1px solid var(--ui-border);
+  box-shadow: 0 6px 14px var(--shadow);
+  animation: toast-in 0.16s ease-out;
+}
+
+.toast.error {
+  border-color: var(--danger);
+}
+
+.toast.success {
+  border-color: var(--success);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.shop-panel {
+  position: absolute;
+  right: 0.55rem;
+  top: 0.55rem;
+  width: min(93vw, 420px);
+  max-height: calc(100vh - 70px);
+  overflow: auto;
+  z-index: 10;
+  border: 1px solid var(--ui-border);
+  border-radius: 12px;
+  background: var(--ui-panel);
+  box-shadow: 0 12px 24px var(--shadow);
+  padding: 0.6rem;
+}
+
+.shop-head,
+.shop-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.shop-head h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.shop-meta {
+  margin-top: 0.45rem;
+  font-size: 0.9rem;
+}
+
+.shop-items {
+  margin-top: 0.65rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.shop-item {
+  border: 1px solid rgba(78, 197, 255, 0.35);
+  border-radius: 8px;
+  padding: 0.5rem;
+  background: rgba(7, 18, 33, 0.8);
+}
+
+.shop-item .meta {
+  display: grid;
+  gap: 0.15rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.shop-item .row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.touch-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0.9rem;
+}
+
+.touch-pad {
+  width: 34vw;
+  max-width: 170px;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: radial-gradient(circle at 28% 28%, rgba(93, 179, 222, 0.18), rgba(7, 14, 24, 0.04));
+  position: relative;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.pad-knob {
+  position: absolute;
+  width: 32%;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  left: 34%;
+  top: 34%;
+  background: rgba(78, 197, 255, 0.45);
+  border: 1px solid rgba(215, 243, 255, 0.8);
+}
+
+.hidden {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  #gameCanvas {
+    height: calc(100vh - 54px);
+  }
+
+  .touch-layer {
+    opacity: 0.28;
+  }
+
+  .touch-pad {
+    width: 220px;
+  }
+}

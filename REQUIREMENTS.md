@@ -1,348 +1,185 @@
-Create a complete personal web app project that implements a mobile-first Survivors bullet hell game. Deliver a ready-to-build repository scaffold and all source code in vanilla JavaScript, HTML, and CSS with a minimal fast build and test setup. Keep local storage as an abstracted storage adapter so it can be swapped for a remote API later. Make graphics simple solid colors and geometric shapes so sprites can be swapped later. The app must work offline as a Progressive Web App and when online must detect an available update and show a user-facing update notification that lets the user refresh to apply the update.
-
-Follow these explicit requirements and acceptance criteria exactly.
-
----
-
-High level goals and constraints
-
-- Language and frameworks: Vanilla JavaScript (ES2022+), HTML, CSS. No heavy frameworks. Small dev tooling allowed for fast builds.
-- Build and test speed: Use esbuild for bundling and Vitest for tests. Keep dependencies minimal.
-- Offline support: Implement a service worker that caches app shell and assets and supports update detection. When a new service worker is available, show a non-blocking in-app notification prompting the user to update.
-- Storage abstraction: Provide a StorageAdapter interface with a LocalStorageAdapter implementation. Design the interface so it can be replaced with ApiStorageAdapter later without changing game logic.
-- Mobile-first: Responsive layout optimized for mobile portrait, touch controls (virtual joystick and tap/shoot button), and keyboard support for desktop.
-- Graphics: Use simple solid colors and shapes drawn on <canvas>. All colors and sizes must be configurable constants so sprites can replace them later.
-- Audio: Provide a small set of replaceable SFX implemented with WebAudio oscillator or short base64 audio blobs. Keep SFX modular and easy to replace.
-- Gameplay features:
-  - Survivors bullet hell style: player dodges many bullets and shoots back.
-  - Player has health, speed, cooldown, weapon type, and passive modifiers.
-  - Weapons have cooldowns, projectile speed, damage, spread, and special effects.
-  - Enemies spawn in waves with bullet patterns.
-  - Levels: 3 distinct levels with different enemy spawn patterns and backgrounds.
-  - Currency: in-game coins collected during play.
-  - Shop and progression: coins buy characters, weapons, and upgrades. New content unlocks as player plays more.
-  - 10 playable characters with unique starting weapons and stats.
-  - 10–15 upgradable items or upgrades (list provided below).
-  - High score and per-level best scores saved locally.
-  - Level unlocks and weapon unlocks based on playtime or achievements.
-- Testing: Provide unit tests for core game logic (collision, cooldown, storage adapter, upgrade calculations) using Vitest and jsdom where needed. Provide a test plan document describing manual and automated tests.
-- Readme: Include a README with setup, build, run, test, and extension instructions.
-- Code quality: Modular, well-documented functions, clear separation of concerns, and easy to extend.
-
----
-
-Deliverables required by the prompt
-
-- Full project scaffold with package.json, src folder, public folder, index.html, manifest.json, service-worker.js, and README.md.
-- src modules:
-  - main.js app bootstrap
-  - game/engine.js game loop and tick management
-  - game/render.js canvas rendering utilities
-  - game/input.js touch and keyboard controls
-  - game/player.js player class and stats
-  - game/enemy.js enemy class and spawn manager
-  - game/projectile.js projectile class and bullet patterns
-  - game/level.js level definitions and spawn patterns
-  - game/shop.js shop and upgrade logic
-  - game/ui.js UI overlays, HUD, and update notification
-  - storage/storageAdapter.js interface and localStorageAdapter.js implementation
-  - audio/sfx.js simple SFX manager
-  - data/characters.js 10 character definitions
-  - data/items.js 10–15 upgrade definitions
-  - data/levels.js 3 level definitions
-  - tests/* unit tests
-- public/ static assets (placeholder color images if needed) and index.html.
-- manifest.json for PWA and icons (use simple colored SVG placeholders).
-- service-worker.js with cache-first strategy for app shell and network-first for optional remote content; implement update detection and postMessage to the app to trigger update notification.
-- README.md and TEST_PLAN.md.
-
----
-
-Project structure example
-
-`
-/survivors-bullet-hell
-  /public
-    index.html
-    manifest.json
-    icons/
-    favicon.ico
-  /src
-    main.js
-    /game
-      engine.js
-      render.js
-      input.js
-      player.js
-      enemy.js
-      projectile.js
-      level.js
-      shop.js
-      ui.js
-    /storage
-      storageAdapter.js
-      localStorageAdapter.js
-    /audio
-      sfx.js
-    /data
-      characters.js
-      items.js
-      levels.js
-  /tests
-    engine.test.js
-    storage.test.js
-    player.test.js
-  package.json
-  service-worker.js
-  README.md
-  TEST_PLAN.md
-`
-
----
-
-package.json example for fast builds and tests
-
-Provide this package.json in the scaffold.
-
-`json
-{
-  "name": "survivors-bullet-hell",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "esbuild src/main.js --bundle --outfile=public/dist/bundle.js --servedir=public --sourcemap --watch",
-    "build": "esbuild src/main.js --bundle --minify --outfile=public/dist/bundle.js",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "lint": "eslint src --ext .js"
-  },
-  "devDependencies": {
-    "esbuild": "^0.19.0",
-    "vitest": "^1.0.0",
-    "jsdom": "^22.0.0",
-    "eslint": "^8.0.0"
-  }
-}
-`
-
----
-
-Storage adapter interface
-
-Create storage/storageAdapter.js with this interface:
-
-- Methods:
-  - async get(key) returns parsed JSON or null
-  - async set(key, value) stores JSON-serializable value
-  - async remove(key)
-  - async clear()
-  - async keys() returns array of keys
-
-Implement localStorageAdapter.js using localStorage but exposing async API (Promise-based). Keep all calls to storage via this adapter.
-
----
-
-Service worker and update notification behavior
-
-- Cache app shell files on install: index.html, dist/bundle.js, manifest.json, CSS, icons.
-- On activate, claim clients.
-- On fetch, use cache-first for app shell and network-first for dynamic content.
-- When a new service worker is installed and waiting, send a postMessage to clients with {type: 'SWUPDATEAVAILABLE'}.
-- In src/ui.js listen for navigator.serviceWorker messages and show a small in-app banner with text: Update available Tap to refresh. Tapping calls skipWaiting via message to the service worker and then reloads the page when the new worker activates.
-- Provide fallback if service worker not supported.
-
----
-
-Gameplay design details
-
-Core loop and tick
-- Fixed timestep game loop at 60 FPS target with requestAnimationFrame and accumulator for deterministic updates.
-- Separate update(dt) and render() phases.
-- Keep physics simple AABB collision for player/projectile/enemy.
-
-Player
-- Stats: maxHealth, healthRegen (per second), speed, baseDamage, cooldown (ms), size, armor (damage reduction percent).
-- Actions: move, shoot, dash (optional unlock).
-- Inventory: starting weapon, passive modifiers from items.
-
-Weapons
-- Weapon properties: id, name, cooldownMs, projectileSpeed, damage, spreadDegrees, projectilesPerShot, ammo (optional), special (e.g., piercing, explosive).
-- Weapons have levels that reduce cooldown or increase damage.
-
-Enemies
-- Enemy properties: hp, speed, size, scoreValue, bulletPattern (function or pattern id).
-- Patterns: radial, spiral, aimed bursts, wave.
-
-Levels
-- Level 1: Arena small; slow enemies; simple radial bullets.
-- Level 2: Medium arena; faster enemies; spiral bullets and occasional mini-boss.
-- Level 3: Large arena; dense bullets; boss with multi-phase patterns.
-
-Currency and shop
-- Coins drop from enemies and appear as small circles to collect.
-- Shop accessible from main menu and between levels.
-- Purchases: characters, starting weapons, permanent upgrades.
-- Unlock rules: some items unlocked after X plays or reaching score thresholds.
-
-Progression and unlocks
-- Track playCount, totalCoinsCollected, levelsCompleted.
-- Unlock new weapons/levels/characters when thresholds reached.
-
----
-
-Characters list 10 unique starting characters
-
-Provide these 10 characters in data/characters.js with unique starting weapon and stats. Example entries:
-
-1. Rookie starting pistol; balanced stats
-2. Runner higher speed, lower health; starting SMG
-3. Tank high health, low speed; starting shotgun
-4. Sharpshooter high damage, slow fire; starting sniper
-5. Engineer starts with turret deploy ability; medium stats
-6. Medic slow but passive health regen; starting pistol with heal boost
-7. Berserker high damage on low health; melee-ish short-range weapon
-8. Scout tiny size, high dodge; starting burst weapon
-9. Demolisher explosive projectiles; low fire rate
-10. Ghost temporary invisibility cooldown; low health
-
-Each character entry must include: id, name, description, baseStats, startingWeaponId, unlockCondition (e.g., default or coins).
-
----
-
-Items and upgrades 12 example items
-
-Provide 12 upgradeable items in data/items.js. Each item has id, name, description, type (weaponUpgrade, playerBoost, passive), levels array with stat deltas and cost per level. Example items:
-
-1. Reinforced Plating playerBoost increases maxHealth
-2. Lightweight Boots playerBoost increases speed
-3. Auto-Loader weaponUpgrade reduces cooldown
-4. High-Velocity Rounds weaponUpgrade increases projectileSpeed
-5. Piercing Rounds weaponUpgrade adds piercing chance
-6. Rapid Fire Mod weaponUpgrade increases projectilesPerShot or fire rate
-7. Nano-Healer passive slowly heals in combat
-8. Coin Magnet passive increases pickup radius for coins
-9. Shield Generator active cooldown shield (unlockable)
-10. Explosive Rounds weaponUpgrade adds area damage on hit
-11. Critical Tuner passive increases crit chance or damage
-12. Ammo Reserve passive increases starting ammo or reduces cooldown penalty
-
-Each item should have 3–5 upgrade levels with increasing cost and diminishing returns.
-
----
-
-Levels definitions
-
-Provide data/levels.js with 3 levels. Each level includes id, name, arenaSize (logical size), backgroundColor, spawnPatterns array, music (optional), and unlockCondition.
-
----
-
-UI and HUD
-
-- Top-left: health bar and player name
-- Top-right: coins and high score
-- Bottom-left: virtual joystick area
-- Bottom-right: shoot button and special ability button
-- Center overlay: pause, shop, and level select
-- Small toast area for update notifications and unlock messages
-
----
-
-Audio SFX list
-
-Provide simple SFX implemented in audio/sfx.js using WebAudio oscillator or short base64 blobs:
-
-- sfx.shoot short beep
-- sfx.hit low click
-- sfx.enemyDeath short descending tone
-- sfx.coin bright chime
-- sfx.levelUp celebratory tone
-- sfx.shopBuy soft confirm
-- sfx.updateAvailable subtle ping
-
-Make SFX replaceable by exposing sfx.register(name, AudioBuffer|function).
-
----
-
-Tests and test plan
-
-Automated tests
-- tests/storage.test.js tests LocalStorageAdapter get/set/remove/clear/keys.
-- tests/engine.test.js tests fixed timestep update behavior and accumulator edge cases.
-- tests/player.test.js tests damage, heal, cooldown, and upgrade application.
-- tests/collision.test.js tests projectile-enemy and player-enemy collisions.
-
-Use Vitest and jsdom for DOM-related tests. Keep tests fast and deterministic.
-
-Manual test plan TEST_PLAN.md
-- Install and run dev server verify app loads offline after first load.
-- Service worker update flow: simulate new service-worker.js and verify update banner appears and refresh applies new version.
-- Gameplay: verify player movement, shooting, enemy spawn, coin drops, and collisions.
-- Shop and persistence: buy item, reload, verify persistence via storage adapter.
-- Unlocks: reach thresholds and verify unlocks appear.
-- Mobile touch: test virtual joystick and shoot button responsiveness.
-- Audio: toggle SFX on/off and verify sounds play.
-- Performance: verify stable 60 FPS on mid-range mobile device with moderate bullet count.
-
----
-
-README content outline
-
-Include sections:
-
-- Project overview
-- Features
-- Quick start with commands:
-  - npm install
-  - npm run dev open http://localhost:8000 or http://localhost:3000 depending on dev server
-  - npm run build
-  - npm run test
-- How to play controls and UI
-- Extending the game how to add characters, weapons, levels, and swap storage adapter
-- Service worker and update flow explanation
-- Testing how to run tests and add new tests
-- License
-
----
-
-Implementation notes for the model
-
-- Use modular ES modules and export default classes where appropriate.
-- Keep all constants (colors, sizes, speeds) in a single config.js file for easy replacement.
-- Keep rendering and game logic separated. render.js should only draw based on game state.
-- Keep deterministic logic in engine.js and pure functions for collision and math to ease testing.
-- Use requestAnimationFrame with a fixed update step of 1/60 seconds and an accumulator.
-- Use performance.now() for timing.
-- Keep all DOM interactions in ui.js.
-- Provide clear inline comments for each module and exported API.
-- Provide small helper utilities for vector math in utils/vector.js.
-
----
-
-Acceptance criteria checklist
-
-- [ ] Vanilla JS project scaffold present with package.json using esbuild and vitest
-- [ ] Service worker implemented with update detection and in-app notification
-- [ ] Storage adapter abstraction with localStorage implementation
-- [ ] Mobile-first controls and responsive layout
-- [ ] 10 characters, 12 items, 3 levels defined in data files
-- [ ] Coins, shop, unlocks, and progression implemented
-- [ ] Simple SFX manager with replaceable sounds
-- [ ] Unit tests for core logic and a TEST_PLAN.md
-- [ ] README.md with setup and extension instructions
-
----
-
-Additional developer guidance
-
-- Keep bundle small and avoid heavy polyfills.
-- Favor simple deterministic math for collision and movement.
-- Keep all assets minimal and replaceable.
-- Make it easy to swap localStorageAdapter for ApiStorageAdapter by only importing storage/storageAdapter.js in game code.
-
----
-
-Final instruction to the code model
-
-Generate the full project files described above. Provide complete source code for each file in the scaffold, including package.json, index.html, manifest.json, service-worker.js, all src modules, public placeholders, README.md, and TEST_PLAN.md. Ensure tests run with npm run test and dev server runs with npm run dev. Keep code modular, well-commented, and ready to run locally.  Please have it automatically build and publish the game hosted on a GitHub pages.
-
-If you cannot produce the entire project in one response, produce the full file list and then output files in logical groups (for example: package.json and build files first, then core src modules, then data files, then service worker, then tests, then README and test plan).
+You are a meticulous senior engineer shipping a complete repo. Do NOT skip requirements.
+
+PRIMARY GOAL
+Create a complete personal web app project that implements a mobile-first Survivors bullet-hell game.
+Deliver a ready-to-build repository scaffold and ALL source code in vanilla JavaScript, HTML, and CSS.
+Use minimal fast tooling: esbuild for bundling and Vitest for tests. Keep dependencies minimal.
+The app must work offline as a Progressive Web App and when online must detect updates and show an in-app update banner that lets the user refresh to apply the update.
+Use simple solid-color geometric shapes on <canvas>. All colors/sizes must be configurable constants so sprites can be swapped later.
+Keep local storage behind an abstract StorageAdapter interface so it can be swapped for an API later.
+Finally: automatically build and publish to GitHub Pages (workflow included) and ensure the app works under a non-root base path (https://user.github.io/repo/).
+
+CRITICAL OUTPUT RULES (must follow)
+1) Output MUST be file-by-file with headings exactly: "FILE: path/to/file"
+2) Include EVERY required file exactly once. No omissions.
+3) If response is too large, split into groups and label: "CONTINUATION: Group N of M"
+4) After each group, print:
+   - Emitted files list
+   - Remaining files list
+5) Do not use placeholders like TODO. Provide complete code.
+
+PHASE 0: PLAN + IMPLEMENTATION MAP (must appear before code)
+A) PLAN (max 25 lines): list major subsystems + tricky requirements.
+B) IMPLEMENTATION MAP: map each key requirement to exact file(s).
+C) Then output files in the exact GROUP ORDER below.
+
+GROUP ORDER (must follow)
+Group 1: package.json, README.md, TEST_PLAN.md, .gitignore, .github/workflows/deploy.yml
+Group 2: public/index.html, public/manifest.json, public/styles.css, public/icons/* (SVG placeholders), public/favicon.ico (can be SVG or tiny placeholder)
+Group 3: service-worker.js (root), and src/main.js SW registration + update message wiring
+Group 4: src/config.js, src/utils/vector.js, src/game/engine.js, src/game/render.js, src/game/input.js
+Group 5: src/game/player.js, src/game/enemy.js, src/game/projectile.js, src/game/level.js
+Group 6: src/game/shop.js, src/game/ui.js, src/storage/storageAdapter.js, src/storage/localStorageAdapter.js, src/audio/sfx.js
+Group 7: src/data/characters.js, src/data/items.js, src/data/levels.js
+Group 8: tests/* (engine, storage, player, collision, shop transaction), plus any remaining glue files
+
+HIGH-LEVEL CONSTRAINTS
+- Vanilla JS (ES2022+), HTML, CSS. No heavy frameworks.
+- Use esbuild bundling into public/dist/bundle.js.
+- Use Vitest + jsdom where needed.
+- Modular ES modules. Keep DOM interactions in ui.js. Keep render.js drawing only from state.
+- Keep deterministic logic in engine.js with fixed timestep. Use performance.now().
+
+PWA + UPDATE FLOW (must be correct)
+- Cache app shell on install: index.html, dist/bundle.js, styles.css, manifest.json, icons.
+- Activate: claim clients.
+- Fetch strategy:
+  - Cache-first for app shell
+  - Network-first for optional dynamic/remote (if any)
+- Update detection contract (must):
+  - When a new SW is installed and waiting, SW notifies all clients with postMessage {type:"SWUPDATEAVAILABLE"}.
+  - UI shows banner: "Update available Tap to refresh" (non-blocking).
+  - Tap sends {type:"SKIP_WAITING"} to SW.
+  - App listens for navigator.serviceWorker.controllerchange and reloads once to apply update.
+- Provide fallback if SW unsupported.
+
+GITHUB PAGES (must work)
+- Add .github/workflows/deploy.yml to build and deploy on push to main.
+- Publish the /public directory as the Pages artifact after running npm ci && npm run build.
+- IMPORTANT: The app must work when hosted at /<repo>/ (non-root base path).
+  - Avoid absolute URLs. Use relative paths.
+  - Service worker scope/cached URLs must match Pages pathing.
+  - manifest icons paths must be relative.
+
+STORAGE ABSTRACTION (must)
+Create storage/storageAdapter.js with interface:
+- async get(key) -> parsed JSON or null
+- async set(key, value) -> stores JSON-serializable value
+- async remove(key)
+- async clear()
+- async keys() -> array of keys
+Implement localStorageAdapter.js using localStorage but async API. ALL persistence uses adapter only.
+
+MOBILE-FIRST INPUT + AIM POLISH (must to avoid confusion)
+- Touch controls:
+  - Bottom-left virtual joystick = movement vector.
+  - Bottom-right shoot area:
+    - Drag sets AIM direction vector.
+    - Tap fires in last aim direction.
+    - If no aim yet, fire in movement direction; if no movement, fire upward by default.
+- Desktop:
+  - WASD/arrow keys move.
+  - Mouse aim (move mouse sets aim vector relative to player).
+  - Click or Space shoots.
+- Render a visible aim indicator line/arrow from player at all times.
+- Show a brief first-launch overlay hint: "Left stick moves • Right pad aims • Tap fires" persisted via StorageAdapter.
+
+GAME FEEL + SMOOTHNESS (must)
+- Engine:
+  - Fixed timestep STEP = 1/60 seconds with accumulator (dt in seconds, not ms).
+  - Clamp frameTime max 0.05s.
+  - Store prev position for entities each tick.
+  - Render interpolation with alpha = accumulator / STEP and draw lerp(prevPos, pos, alpha) to prevent jerkiness.
+- Performance:
+  - Use simple object pooling for projectiles to reduce GC stutter.
+  - Cap bullets/enemies reasonably with configurable constants.
+- Feedback:
+  - Enemy hit flash or brief color tint.
+  - UI toasts for purchase success/failure and unlocks.
+  - Settings toggle for SFX (persisted).
+
+GAMEPLAY REQUIREMENTS
+- Survivors bullet hell style: player dodges many bullets and shoots back.
+- Player stats: maxHealth, healthRegen/sec, speed, baseDamage, cooldownMs, size, armorPercent.
+- Weapons: id,name,cooldownMs,projectileSpeed,damage,spreadDegrees,projectilesPerShot,special (piercing/explosive).
+- Enemies spawn in waves with bullet patterns: radial, spiral, aimed burst, wave.
+- Levels: 3 levels with distinct enemy patterns and backgroundColor (data/levels.js).
+- Currency: coins drop and can be collected. Coin magnet item increases pickup radius.
+- Shop/progression:
+  - Coins buy characters, weapons, and upgrades.
+  - Unlocks based on playCount, totalCoinsCollected, levelsCompleted, and score thresholds.
+  - Save high score and per-level best locally.
+- 10 playable characters (data/characters.js) with stats, startingWeaponId, unlockCondition.
+- 12 upgradeable items (data/items.js) with 3–5 levels, increasing cost, diminishing returns.
+
+SHOP CORRECTNESS (must to avoid “free upgrades” bug)
+- All purchases must go through shop.buy(itemId) atomic transaction:
+  - recompute next cost from current owned level
+  - validate coins >= cost
+  - deduct coins and increment level
+  - persist via StorageAdapter
+  - return {ok:true} or {ok:false, reason:"INSUFFICIENT_COINS"|"MAX_LEVEL"}
+- UI must NOT mutate coins/levels directly; it only calls shop.buy and re-renders from state.
+- Disabled buy buttons when cannot afford.
+- Toast on failed purchase.
+
+AUDIO (must)
+- src/audio/sfx.js provides modular replaceable SFX using WebAudio oscillators.
+- Provide: shoot, hit, enemyDeath, coin, levelUp, shopBuy, updateAvailable
+- Expose sfx.register(name, function|AudioBuffer) and sfx.play(name).
+
+REQUIRED MODULES / FILES
+- src/main.js
+- src/config.js
+- src/utils/vector.js
+- src/game/engine.js
+- src/game/render.js
+- src/game/input.js
+- src/game/player.js
+- src/game/enemy.js
+- src/game/projectile.js
+- src/game/level.js
+- src/game/shop.js
+- src/game/ui.js
+- src/storage/storageAdapter.js
+- src/storage/localStorageAdapter.js
+- src/audio/sfx.js
+- src/data/characters.js (10)
+- src/data/items.js (12)
+- src/data/levels.js (3)
+- tests/storage.test.js
+- tests/engine.test.js
+- tests/player.test.js
+- tests/collision.test.js
+- tests/shop.test.js
+- public/index.html
+- public/styles.css
+- public/manifest.json
+- public/icons/* placeholders
+- service-worker.js
+- README.md
+- TEST_PLAN.md
+
+TESTING (must)
+- Use Vitest; tests must be deterministic and fast.
+- Tests required:
+  - storage adapter get/set/remove/clear/keys
+  - engine fixed timestep accumulator behavior and clamping
+  - player damage/heal/cooldown + upgrade application
+  - collision projectile-enemy and player-enemy AABB
+  - shop atomic purchase (insufficient coins cannot upgrade; exact coins works; persistence reload)
+- Provide TEST_PLAN.md manual tests including offline, SW update flow, mobile controls, shop persistence.
+
+README (must)
+Include: setup, dev, build, test, how to play, extending, storage adapter swap, SW update flow, GitHub Pages deploy.
+
+QUALITY GATES (must complete before final output)
+Before ending, do a self-audit and ensure:
+- Dual-stick aiming works and is explained + aim indicator visible.
+- Shop purchases cannot occur without sufficient coins.
+- Enemy movement is smooth (interpolation + pooling).
+- PWA offline works after first load.
+- Update banner appears when new SW waiting and refresh applies update.
+- GitHub Pages deploy workflow publishes and app works under /<repo>/.
+
+NOW GENERATE THE FULL PROJECT FILES IN THE GROUP ORDER ABOVE.
