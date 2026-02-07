@@ -1,5 +1,7 @@
 node_modules
 dist
+#public/dist
+public/service-worker.js
 coverage
 .DS_Store
 *.log

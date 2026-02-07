@@ -25,6 +25,7 @@ const context = await esbuild.context({
 
 await context.watch();
 const server = await context.serve({ servedir: "public", port });
+const host = server.host ?? "localhost";
 
-console.log(`Dev server: http://${server.host}:${server.port}`);
+console.log(`Dev server: http://${host}:${server.port}`);
 console.log("Press Ctrl+C to stop.");

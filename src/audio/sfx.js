@@ -7,6 +7,8 @@ export class Sfx {
     this.registry = new Map();
     this.enabled = true;
     this.audioContext = null;
+    this.unlocked = false;
+    this.unlockHandler = null;
   }
 
   setEnabled(enabled) {
@@ -24,12 +26,34 @@ export class Sfx {
     return this.audioContext;
   }
 
+  enableAutoUnlock() {
+    if (this.unlockHandler) {
+      return;
+    }
+
+    this.unlockHandler = async () => {
+      this.unlocked = true;
+      const ctx = this.getContext();
+      if (ctx?.state === "suspended") {
+        await ctx.resume().catch(() => {});
+      }
+
+      for (const eventName of ["pointerdown", "keydown", "touchstart"]) {
+        window.removeEventListener(eventName, this.unlockHandler);
+      }
+    };
+
+    for (const eventName of ["pointerdown", "keydown", "touchstart"]) {
+      window.addEventListener(eventName, this.unlockHandler, { once: true, passive: true });
+    }
+  }
+
   register(name, clip) {
     this.registry.set(name, clip);
   }
 
   play(name, options = {}) {
-    if (!this.enabled) {
+    if (!this.enabled || !this.unlocked) {
       return;
     }
 
@@ -78,6 +102,7 @@ function beep(ctx, { frequency = 440, duration = 0.08, type = "square", volume =
 
 export function createDefaultSfx() {
   const sfx = new Sfx();
+  sfx.enableAutoUnlock();
 
   sfx.register("shoot", (ctx) => beep(ctx, { frequency: 760, duration: 0.05, type: "square", volume: 0.02, slide: -160 }));
   sfx.register("hit", (ctx) => beep(ctx, { frequency: 280, duration: 0.06, type: "triangle", volume: 0.03, slide: -30 }));
